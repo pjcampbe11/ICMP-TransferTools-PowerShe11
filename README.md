@@ -1,4 +1,4 @@
-# ICMP-TransferTools
+# ICMP-TransferTools-PowerShell
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -10,9 +10,10 @@
 3. [Installation and Prerequisites](#installation-and-prerequisites)
 4. [Usage Examples](#usage-examples)
 5. [Administrative Privileges and Alternatives](#administrative-privileges-and-alternatives)
+6. [PowerShell vs Python Version](#powershell-vs-python-version)
 
 ## Overview
-ICMP-TransferTools is a set of PowerShell scripts designed to transfer files between Windows hosts using ICMP packets. This approach enables file transfers in restricted network environments.
+ICMP-TransferTools-PowerShell is a set of PowerShell scripts designed to transfer files between Windows hosts using ICMP packets. This approach enables file transfers in restricted network environments without relying on traditional file transfer methods.
 
 ## Tool Descriptions
 ### ICMP-SendFile.ps1
@@ -73,6 +74,19 @@ Invoke-IcmpUpload -ServerIP YourPublicIP -FileName FileToUpload
 
 ### Alternative Without Admin Rights:
 - If admin rights are unavailable, use **Windows Firewall Advanced Settings** to manually allow ICMP traffic.
+
+## PowerShell vs Python Version
+With the conversion of `ICMP-ReceiveFile.py` and `ICMP-SendFile.py` to PowerShell, there are no fundamental changes to the way these tools function. The PowerShell versions remain fully compatible with `Invoke-IcmpDownload.ps1` and `Invoke-IcmpUpload.ps1`, maintaining seamless file transfers. Key impacts of the PowerShell conversion:
+
+- **Removal of Python and Impacket Dependency:** Unlike the previous Python versions, these scripts do not require external libraries like `Impacket`, simplifying deployment.
+- **Same Functionality:** The workflow remains identical—files are sent and received using ICMP, maintaining compatibility with the original tools.
+- **Increased PowerShell Integration:** The scripts leverage built-in PowerShell commands, removing the need for additional software installation.
+- **Alternative Implementation for ICMP Packet Handling:** While Python required raw socket handling via `Impacket`, PowerShell achieves similar behavior using .NET networking objects.
+
+### Key Differences & Alternative Considerations
+- **Administrative Rights:** Unlike Python, PowerShell requires admin privileges to modify ICMP firewall rules. If admin rights are unavailable, manually enabling ICMP traffic in Windows Firewall is required.
+- **Cross-Platform Compatibility:** The Python versions allowed execution across multiple operating systems, whereas the PowerShell scripts are Windows-exclusive.
+- **Performance Considerations:** PowerShell's handling of ICMP packets might introduce slight differences in execution timing, but this does not impact overall functionality.
 
 ## Notes
 - These scripts should be executed within PowerShell with necessary execution policies enabled.
