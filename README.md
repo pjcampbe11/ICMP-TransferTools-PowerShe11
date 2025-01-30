@@ -10,7 +10,6 @@
 3. [Installation and Prerequisites](#installation-and-prerequisites)
 4. [Usage Examples](#usage-examples)
 5. [Administrative Privileges and Alternatives](#administrative-privileges-and-alternatives)
-6. [Demonstrations](#demonstrations)
 
 ## Overview
 ICMP-TransferTools is a set of PowerShell scripts designed to transfer files between Windows hosts using ICMP packets. This approach enables file transfers in restricted network environments.
