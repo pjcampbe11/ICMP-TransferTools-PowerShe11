@@ -150,7 +150,7 @@ function Send-ICMPFile {
 }
 ```
 
-### **Summary of Modifications**#### **Both scripts attempt to modify firewall rules, which require admin rights. If ICMP is already allowed, these modifications should be unnecessary. Removing or commenting out firewall modification functions should allow the scripts to run without admin privileges.**
+### **Summary of Modifications**#### Both scripts attempt to modify firewall rules, which require admin rights. If ICMP is already allowed, these modifications should be unnecessary. Removing or commenting out firewall modification functions should allow the scripts to run without admin privileges.
 ---
 ## **Final Notes**
 - Always **test script modifications** in a controlled environment before deploying to production systems.
