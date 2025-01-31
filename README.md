@@ -88,14 +88,14 @@ If **ICMP is already allowed** between two hosts (i.e., firewall rules permit IC
 ### **Key Takeaway**
 - If ICMP is **already enabled**, you do *not* need admin rights to send/receive files via ICMP.
 - If **firewall rules need modification**, **admin rights are necessary**.
-- **Python and PowerShell can both be used for ICMP-based file transfers without admin privileges**âprovided the firewall already allows ICMP traffic.
+- **Python and PowerShell can both be used for ICMP-based file transfers without admin privileges provided the firewall already allows ICMP traffic.
 
 ---
 
 ## **2. Recommended Modifications for ICMP Transfer Scripts**
 
 ### **Overview**  
-Upon reviewing the [ICMP-ReceiveFile-PowerShell.ps1](https://github.com/pjcampbe11/ICMP-TransferTools-PowerShe11/blob/main/ICMP-ReceiveFile-PowerShell.ps1) and [ICMP-SendFile-PowerShell.ps1](https://github.com/pjcampbe11/ICMP-TransferTools-PowerShe11/blob/main/ICMP-SendFile-PowerShell.ps1) scripts, it is clear that both scripts contain functions that modify firewall rules to enable or disable ICMP ping replies.
+The [ICMP-ReceiveFile-PowerShell.ps1](https://github.com/pjcampbe11/ICMP-TransferTools-PowerShe11/blob/main/ICMP-ReceiveFile-PowerShell.ps1) and [ICMP-SendFile-PowerShell.ps1](https://github.com/pjcampbe11/ICMP-TransferTools-PowerShe11/blob/main/ICMP-SendFile-PowerShell.ps1) scripts both contain functions that modify firewall rules to enable or disable ICMP ping replies.
 
 Since **these modifications require administrative privileges**, and if ICMP traffic is already enabled, the scripts should be modified to remove these unnecessary firewall changes.
 
@@ -150,18 +150,15 @@ function Send-ICMPFile {
 }
 ```
 
-### **Summary of Modifications**
-â **Both scripts attempt to modify firewall rules, which require admin rights.**  
-â **If ICMP is already allowed, these modifications are unnecessary.**  
-â **Removing or commenting out firewall modification functions will allow the scripts to run without admin privileges.**  
+### **Summary of Modifications** **Both scripts attempt to modify firewall rules, which require admin rights.** **If ICMP is already allowed, these modifications should be unnecessary.** **Removing or commenting out firewall modification functions should allow the scripts to run without admin privileges.**  
 
 ---
 
 ## **Final Notes**
 - Always **test script modifications** in a controlled environment before deploying to production systems.
 - If firewall rules **must** be changed dynamically, running the script **as an administrator** remains necessary.
-- **If ICMP is pre-enabled, these modifications will make the scripts more accessible for non-admin users.**
-- If admin rights are unavailable, get them through a PrivEsc 
+- **If ICMP is pre-enabled, these modifications should make the scripts more accessible for non-admin users.**
+- If admin rights are unavailable, get them through a **PrivEsc** or modify the script as needed. 
 
 ## PowerShell vs Python Version
 With the conversion of ICMP-ReceiveFile.py and ICMP-SendFile.py to PowerShell, there are no fundamental changes to the way these tools function. The PowerShell versions remain fully compatible with Invoke-IcmpDownload.ps1 and Invoke-IcmpUpload.ps1, maintaining seamless file transfers.
