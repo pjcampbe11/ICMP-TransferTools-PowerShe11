@@ -153,7 +153,7 @@ function Send-ICMPFile {
 
 ### 🔹 Key Changes
 - Both scripts attempt to modify firewall rules, which **require admin rights**.
-- If **ICMP is already allowed**, these modifications **should be unnecessary**.
+- If **ICMP is already allowed**, these modifications **should allow for non-admin file transfers**.
 - **Removing or commenting out** the firewall modification functions should allow the scripts to run **without admin privileges**.
 
 ### ✅ Recommended Actions
