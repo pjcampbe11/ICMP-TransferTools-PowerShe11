@@ -88,7 +88,7 @@ If **ICMP is already allowed** between two hosts (i.e., firewall rules permit IC
 ### **Key Takeaway**
 - If ICMP is **already enabled**, you do *not* need admin rights to send/receive files via ICMP.
 - If **firewall rules need modification**, **admin rights are necessary**.
-- **Python and PowerShell can both be used for ICMP-based file transfers without admin privileges provided the firewall already allows ICMP traffic.
+-**Python and PowerShell** can both be used for ICMP-based file transfers without admin privileges provided the firewall already allows ICMP traffic.
 
 ---
 
