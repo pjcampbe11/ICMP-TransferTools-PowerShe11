@@ -69,7 +69,98 @@ Invoke-IcmpUpload -ServerIP YourPublicIP -FileName FileToUpload
 - ICMP-ReceiveFile.ps1 and ICMP-SendFile.ps1 require admin rights to modify ICMP firewall rules.
 - Run PowerShell as administrator before executing these scripts.
 
-### Alternative Without Admin Rights:
+# **ICMP Transfer Tools - Recommendations & Admin Rights Considerations**
+
+## **1. Understanding Admin Rights for ICMP-Based Transfers**
+
+### **Do You Need Admin Rights for ICMP Transfers?**  
+If **ICMP is already allowed** between two hosts (i.e., firewall rules permit ICMP traffic), **no additional administrative privileges** are required **to send and receive files using ICMP-based tools**. However, a few key considerations remain:
+
+### **When Admin Rights Are Not Required**
+- If ICMP traffic is **already permitted**, you **do not** need admin rights to send and receive ICMP packets.
+- You can use PowerShell, Python, or other tools to send and receive ICMP-based data **without requiring admin access**.
+  
+### **When Admin Rights Are Still Needed**
+- **Modifying firewall rules:** If you need to **enable ICMP traffic** or adjust firewall settings, **admin rights are required**.
+- **Installing certain tools:** Some ICMP-based file transfer tools might require installation privileges.
+- **Using raw sockets (Python only):** If you're crafting ICMP packets manually with **raw sockets in Python**, admin rights **might** be required.
+
+### **Key Takeaway**
+- If ICMP is **already enabled**, you do *not* need admin rights to send/receive files via ICMP.
+- If **firewall rules need modification**, **admin rights are necessary**.
+- **Python and PowerShell can both be used for ICMP-based file transfers without admin privileges**âprovided the firewall already allows ICMP traffic.
+
+---
+
+## **2. Recommended Modifications for ICMP Transfer Scripts**
+
+### **Overview**  
+Upon reviewing the [ICMP-ReceiveFile-PowerShell.ps1](https://github.com/pjcampbe11/ICMP-TransferTools-PowerShe11/blob/main/ICMP-ReceiveFile-PowerShell.ps1) and [ICMP-SendFile-PowerShell.ps1](https://github.com/pjcampbe11/ICMP-TransferTools-PowerShe11/blob/main/ICMP-SendFile-PowerShell.ps1) scripts, it is clear that both scripts contain functions that modify firewall rules to enable or disable ICMP ping replies.
+
+Since **these modifications require administrative privileges**, and if ICMP traffic is already enabled, the scripts should be modified to remove these unnecessary firewall changes.
+
+### **Recommended Modifications**
+#### **1. Remove or Comment Out Firewall Modification Functions**
+- Locate and **remove or comment out** functions that enable or disable ICMP ping replies.
+
+#### **2. Adjust Function Calls**
+- Find where these functions are invoked and **comment out or remove these calls**.
+
+### **Implementation Details**
+
+#### **Changes in `ICMP-ReceiveFile-PowerShell.ps1`**
+- **Locate and remove the `Enable-PingReply` function**:
+```
+# Comment out or remove the Enable-PingReply function
+# function Enable-PingReply {
+#     Write-Host "[+] Enabling ICMP Ping Replies..."
+#     try {
+#         Set-NetFirewallRule -DisplayName "File and Printer Sharing (Echo Request - ICMPv4-In)" -Enabled True -PassThru
+#     } catch {
+#         Write-Host "[!] Error enabling ping replies. Run as administrator."
+#         exit
+#     }
+# }
+
+function Receive-ICMPFile {
+    # Comment out or remove the call to Enable-PingReply
+    # Enable-PingReply
+    # ... rest of the function ...
+}
+```
+
+#### **Changes in `ICMP-SendFile-PowerShell.ps1`**
+- **Locate and remove the `Disable-PingReply` function**:
+```
+# Comment out or remove the Disable-PingReply function
+# function Disable-PingReply {
+#     Write-Host "[+] Disabling ICMP Ping Replies..."
+#     try {
+#         Set-NetFirewallRule -DisplayName "File and Printer Sharing (Echo Request - ICMPv4-In)" -Enabled False -PassThru
+#     } catch {
+#         Write-Host "[!] Error disabling ping replies. Run as administrator."
+#         exit
+#     }
+# }
+
+function Send-ICMPFile {
+    # Comment out or remove the call to Disable-PingReply
+    # Disable-PingReply
+    # ... rest of the function ...
+}
+```
+
+### **Summary of Modifications**
+â **Both scripts attempt to modify firewall rules, which require admin rights.**  
+â **If ICMP is already allowed, these modifications are unnecessary.**  
+â **Removing or commenting out firewall modification functions will allow the scripts to run without admin privileges.**  
+
+---
+
+## **Final Notes**
+- Always **test script modifications** in a controlled environment before deploying to production systems.
+- If firewall rules **must** be changed dynamically, running the script **as an administrator** remains necessary.
+- **If ICMP is pre-enabled, these modifications will make the scripts more accessible for non-admin users.**
 - If admin rights are unavailable, get them through a PrivEsc 
 
 ## PowerShell vs Python Version
