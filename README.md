@@ -417,3 +417,122 @@ Run this to send a file over ICMP:
 
 .\Send-ICMPFile.ps1 -destination "192.168.1.100" -file "C:\secret-data.txt" -blockSize 1000 -verbose
 
+--
+
+
+# How to Execute DLLs on Linux
+
+Executing DLL files on Linux depends on the type of DLL and the technology it was built with. Below are different methods for running Windows DLLs on a Linux system.
+
+---
+
+## **1. Running .NET DLLs on Linux**
+If the DLL is a **.NET assembly** (built with C# or VB.NET), you can use **Mono** or **.NET Core**:
+
+### **🔹 Using .NET 6+/Core Runtime**
+For .NET Core and newer .NET versions:
+```
+dotnet <your-dll-file>.dll
+```
+➡️ Requires **.NET SDK or Runtime** installed:
+```
+sudo apt install dotnet-sdk-7.0
+```
+
+---
+
+## **2. Running Windows DLLs Using Wine**
+If the DLL is a **Windows native library** (built with C/C++), you can use **Wine** to run Windows executables that depend on DLLs.
+
+### **🔹 Steps**
+1. **Install Wine:**
+   ```
+   sudo apt update
+   sudo apt install wine64
+   ```
+2. **Run a Windows program that uses the DLL:**
+   ```
+   wine myprogram.exe
+   ```
+3. If your DLL is standalone, you can register it with Wine:
+   ```
+   wine regsvr32 mylibrary.dll
+   ```
+
+---
+
+## **3. Using DLLs in C/C++ with Wine or Winelib**
+If you are developing an application on Linux and need to load a Windows DLL:
+- Use **Wine's `LoadLibrary`** function in a C program:
+  ```
+  #include <windows.h>
+  
+  int main() {
+      HINSTANCE hDll = LoadLibrary("mylibrary.dll");
+      if (!hDll) {
+          printf("Failed to load DLL\n");
+          return 1;
+      }
+      printf("DLL loaded successfully!\n");
+      FreeLibrary(hDll);
+      return 0;
+  }
+  ```
+- Compile using **MinGW-W64** (Windows cross-compiler for Linux):
+  ```
+  x86_64-w64-mingw32-gcc myprogram.c -o myprogram.exe -mwindows
+  ```
+
+---
+
+## **4. Using DLLs with Python on Linux**
+If the DLL exposes a **C API**, you can use `ctypes` or `cffi` to call functions inside it.
+
+### **🔹 Using Wine + ctypes**
+```
+import ctypes
+dll = ctypes.WinDLL("mylibrary.dll")
+print(dll.SomeFunction())
+```
+Run the script using Wine:
+```
+wine python myscript.py
+```
+
+### **🔹 Running a .NET DLL with Python**
+If the DLL is built in C#:
+```
+import clr  # Install pythonnet
+clr.AddReference("mylibrary.dll")
+```
+Run with **Mono or .NET**:
+```
+python myscript.py
+```
+
+---
+
+## **5. Converting a Windows DLL to Linux Shared Object (.so)**
+If the DLL is needed by a Linux program, you can convert it:
+1. **Use `winedump` to inspect the DLL:**
+   ```
+   winedump -j export mylibrary.dll
+   ```
+2. **Convert it to a shared object (.so):**
+   ```
+   libtool --mode=install install -c mylibrary.dll /usr/lib/mylibrary.so
+   ```
+
+---
+
+## **🔹 Summary**
+| **DLL Type**       | **Execution Method on Linux** |
+|---------------------|------------------------------|
+| .NET (C#) DLL      | `dotnet mylibrary.dll` |
+| Windows Native DLL | `wine myprogram.exe` |
+| C/C++ DLL (API)    | `ctypes` or `cffi` in Python with Wine |
+| Convert to .so     | Use `winedump` and `libtool` |
+
+
+
+
