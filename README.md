@@ -71,7 +71,7 @@ Invoke-IcmpUpload -ServerIP YourPublicIP -FileName FileToUpload
 
 ## **Sending & Modifying**
 
-## **1.Understanding Admin Rights for ICMP-Based Transfers**
+## **1-Understanding Admin Rights for ICMP-Based Transfers**
 
 ### **Do You Need Admin Rights for ICMP Transfers?**  
 If **ICMP is already allowed** between two hosts (i.e., firewall rules permit ICMP traffic), **no additional administrative privileges** are required **to send and receive files using ICMP-based tools**. However, a few key considerations remain:
@@ -92,7 +92,7 @@ If **ICMP is already allowed** between two hosts (i.e., firewall rules permit IC
 
 ---
 
-## **2.Recommended Modifications for ICMP Transfer Scripts**
+## **2-Recommended Modifications for ICMP Transfer Scripts**
 
 ### **Overview**  
 The [ICMP-ReceiveFile-PowerShell.ps1](https://github.com/pjcampbe11/ICMP-TransferTools-PowerShe11/blob/main/ICMP-ReceiveFile-PowerShell.ps1) and [ICMP-SendFile-PowerShell.ps1](https://github.com/pjcampbe11/ICMP-TransferTools-PowerShe11/blob/main/ICMP-SendFile-PowerShell.ps1) scripts both contain functions that modify firewall rules to enable or disable ICMP ping requests/replies.
