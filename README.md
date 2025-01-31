@@ -69,7 +69,7 @@ Invoke-IcmpUpload -ServerIP YourPublicIP -FileName FileToUpload
 - ICMP-ReceiveFile.ps1 and ICMP-SendFile.ps1 require admin rights to modify ICMP firewall rules.
 - Run PowerShell as administrator before executing these scripts.
 
-## **ICMP Transfer Tools - Recommendations & Admin Rights Considerations**
+## **Sending vs Modifying**
 
 ## **1. Understanding Admin Rights for ICMP-Based Transfers**
 
